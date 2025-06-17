@@ -1,5 +1,14 @@
 #!/bin/bash
 
-# Echo Hello, world
+# Make a request for a pokeman.
+URL="https://pokeapi.co/api/v2/pokemon/"
+RES=$(curl -s "$URL")
 
-echo Hello, World
+# Check if the request was successfull
+if [ -n "$RES" ]; then
+    echo "Request is successfull."
+    echo "$RES" >> "data.json"
+else
+    echo "Error."
+    cat "Error" >> "error.txt"
+fi
