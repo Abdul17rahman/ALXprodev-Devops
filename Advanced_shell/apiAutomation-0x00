@@ -10,5 +10,5 @@ if [ -n "$RES" ]; then
     echo "$RES" >> "data.json"
 else
     echo "Error."
-    cat "Error" >> "error.txt"
+    cat "Error" >> "errors.txt"
 fi
