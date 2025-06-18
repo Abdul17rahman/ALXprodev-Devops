@@ -7,15 +7,15 @@ HEIGHT=$(jq -r '.height' "data.json")
 WEIGHT=$(jq -r '.weight' "data.json")
 
 # Capitalize name and type using sed
-name=$(echo "$ext_name" | sed -E 's/^(.)/\U\1/')
-type=$(echo "$ext_type" | sed -E 's/^(.)/\U\1/')
+name=$(echo "$ext_name" | sed 's/^\(.\)/\U\1/')
+type=$(echo "$ext_type" | sed 's/^\(.\)/\U\1/')
 
 # Format height (dm → m) and weight (hg → kg) using awk
-FORMATTED=$(echo "$HEIGHT $WEIGHT" | awk '{ printf "%.1fm, %.1fkg", $1/10, $2/10 }')
+FORMATTED=$(echo "$HEIGHT $WEIGHT" | awk '{ printf "%.1f, %.1f", $1/10, $2/10 }')
 
 # Extract formatted values
 formatted_height=$(echo "$FORMATTED" | cut -d',' -f1)
 formatted_weight=$(echo "$FORMATTED" | cut -d',' -f2)
 
 # Print the output
-echo "$name is of type $type, weighs $formatted_weight and is $formatted_height tall."
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
