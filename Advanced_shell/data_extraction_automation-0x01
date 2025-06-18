@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Extract data from a json file
-NAME=$(jq -r '.name' "data.json")
-TYPE=$(jq -r '.types[0].type.name' "data.json")
+ext_name=$(jq -r '.name' "data.json")
+ext_type=$(jq -r '.types[0].type.name' "data.json")
 HEIGHT=$(jq -r '.height' "data.json")
 WEIGHT=$(jq -r '.weight' "data.json")
 
 # Capitalize name and type using sed
-CAP_NAME=$(echo "$NAME" | sed -E 's/^(.)/\U\1/')
-CAP_TYPE=$(echo "$TYPE" | sed -E 's/^(.)/\U\1/')
+name=$(echo "$ext_name" | sed -E 's/^(.)/\U\1/')
+type=$(echo "$ext_type" | sed -E 's/^(.)/\U\1/')
 
 # Format height (dm → m) and weight (hg → kg) using awk
 FORMATTED=$(echo "$HEIGHT $WEIGHT" | awk '{ printf "%.1fm, %.1fkg", $1/10, $2/10 }')
@@ -18,4 +18,4 @@ formatted_height=$(echo "$FORMATTED" | cut -d',' -f1)
 formatted_weight=$(echo "$FORMATTED" | cut -d',' -f2)
 
 # Print the output
-echo "$CAP_NAME is of type $CAP_TYPE, weighs $formatted_weight and is $formatted_height tall."
+echo "$name is of type $type, weighs $formatted_weight and is $formatted_height tall."
