@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Extract data from a json file
+NAME=$(jq -r '.name' "data.json")
+TYPE=$(jq -r '.types[0].type.name' "data.json")
+HEIGHT=$(jq -r '.height' "data.json")
+WEIGHT=$(jq -r '.weight' "data.json")
+
+# Print the output.
+echo “$NAME is of type $TYPE, weighs ${WEIGHT}kg, and is ${HEIGHT}m tall.”

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Make a request for a pokeman.
-URL="https://pokeapi.co/api/v2/pokemon/"
+URL="https://pokeapi.co/api/v2/pokemon/1"
 RES=$(curl -s "$URL")
 
 # Check if the request was successfull
