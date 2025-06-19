@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# This script generates a report from the multiple pokemon json files.
+
+# Get the files from the data dir
+files=$(ls pokemon_data)
+dir=pokemon_data
+
+# Create a function that extracts data
+extract_data(){
+    file_name=$1
+    ext_name=$(jq -r '.name' $dir/$file_name)
+    HEIGHT=$(jq -r '.height' $dir/$file_name)
+    WEIGHT=$(jq -r '.weight' $dir/$file_name)
+
+    # Capitalize name and type using sed
+    name=$(echo "$ext_name" | sed 's/^\(.\)/\U\1/')
+
+    # Format height (dm → m) and weight (hg → kg) using awk
+    FORMATTED=$(echo "$HEIGHT $WEIGHT" | awk '{ printf "%.1f, %.1f", $1/10, $2/10 }')
+
+    # Extract formatted values
+    formatted_height=$(echo "$FORMATTED" | cut -d',' -f1)
+    formatted_weight=$(echo "$FORMATTED" | cut -d',' -f2)
+
+    # Print the output
+    echo "$name,${formatted_weight},${formatted_height}"
+}
+
+# Create a csv file
+echo "Name,Height (m),Weight (kg)" > pokemon_report.csv
+
+echo "CSV Report generated at: pokemon_report.csv"
+echo \
+
+# Loop through the files to extract the required data
+for file in $files
+    do
+    echo "Extracting data for $file and passing it to csv."
+    data=$(extract_data "$file")
+    echo $data >> pokemon_report.csv
+    sleep 2
+done
+echo \
+
+average_height=$(awk -F "," 'NR > 1 { sum += $3} END {print sum/(NR-1)}' pokemon_report.csv)
+
+average_weight=$(awk -F "," 'NR > 1 { sum += $2} END {print sum/(NR-1)}' pokemon_report.csv)
+
+echo "Average Height: $average_height m"
+echo "Average Weight: $average_weight kg"
