@@ -5,7 +5,6 @@ pokemen="bulbasaur ivysaur venusaur charmander charmeleon"
 max_attempts=3
 output_dir="pokemon_data"
 
-# Create the data folder
 mkdir -p "$output_dir"
 
 # Function to fetch data with retry logic
@@ -19,20 +18,46 @@ fetch_pokemon_data() {
         res=$(curl -s --fail "${url}${poke}")
         if [ $? -eq 0 ] && [ -n "$res" ]; then
             echo "$res" > "${output_dir}/${poke}.json"
-            echo "✅ [$poke] Data saved to ${output_dir}/${poke}.json"
+            echo "✅ [$poke] Data saved."
             success=true
             break
         else
-            echo "❌ [$poke] Failed attempt $attempt"
+            echo "❌ [$poke] Attempt $attempt failed."
             ((attempt++))
             sleep 1
         fi
     done
 
     if [ "$success" = false ]; then
-        echo "⚠️ [$poke] Failed after $max_attempts attempts" >> "${output_dir}/fetch_errors.log"
+        echo "⚠️ [$poke] Failed after $max_attempts attempts." >> "${output_dir}/fetch_errors.log"
     fi
 }
 
-# Loop through Pokémon and fetch in parallel
-for
+# Run all fetches in background and track jobs
+for poke in $pokemen; do
+    fetch_pokemon_data "$poke" &
+done
+
+# Wait for background jobs and kill any stuck ones after timeout
+timeout=10
+start_time=$(date +%s)
+
+while jobs -rp | read -r pid; do
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
+
+    if [ $elapsed -ge $timeout ]; then
+        echo "⏱️ Timeout reached. Killing long-running jobs..."
+        for pid in $(jobs -rp); do
+            echo "Killing process $pid"
+            kill "$pid"
+        done
+        break
+    fi
+    sleep 1
+done
+
+# Wait for any remaining jobs that survived
+wait
+
+echo "✅ All processes done."
