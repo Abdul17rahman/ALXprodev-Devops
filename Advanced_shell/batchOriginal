@@ -1,0 +1,20 @@
+#!/bin/bash
+
+url="https://pokeapi.co/api/v2/pokemon/"
+pokemen="bulbasaur ivysaur venusaur charmander charmeleon"
+
+# Create the data folder
+mkdir pokemon_data
+
+# Loop through the pokemons to retieve data.
+for poke in $pokemen
+    do
+    res=$(curl -s ${url}$poke)
+    # Check if the request was successfull
+    if [ -n "$res" ]; then
+        echo "Fetching data for ${poke}..."
+        echo "$res" >> "pokemon_data/${poke}.json"
+    fi
+    echo "saved pokemon data to pokemon_data/${poke}.json ✅"
+    sleep 2
+done

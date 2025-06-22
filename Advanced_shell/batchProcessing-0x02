@@ -4,17 +4,37 @@ url="https://pokeapi.co/api/v2/pokemon/"
 pokemen="bulbasaur ivysaur venusaur charmander charmeleon"
 
 # Create the data folder
-mkdir pokemon_data
+mkdir -p pokemon_data
 
-# Loop through the pokemons to retieve data.
-for poke in $pokemen
-    do
-    res=$(curl -s ${url}$poke)
-    # Check if the request was successfull
-    if [ -n "$res" ]; then
-        echo "Fetching data for ${poke}..."
-        echo "$res" >> "pokemon_data/${poke}.json"
+# Function to fetch data with retry logic
+fetch_pokemon_data() {
+    local poke=$1
+    local attempt=1
+    local max_attempts=3
+    local success=false
+
+    while [ $attempt -le $max_attempts ]; do
+        echo "Attempt $attempt: Fetching data for ${poke}..."
+        res=$(curl -s --fail "${url}${poke}")
+        if [ $? -eq 0 ] && [ -n "$res" ]; then
+            echo "$res" > "pokemon_data/${poke}.json"
+            echo "✅ Data saved to pokemon_data/${poke}.json"
+            success=true
+            break
+        else
+            echo "❌ Failed to fetch data for ${poke} (attempt $attempt)"
+            ((attempt++))
+            sleep 2
+        fi
+    done
+
+    if [ "$success" = false ]; then
+        echo "⚠️ Error: Unable to retrieve data for ${poke} after $max_attempts attempts." >> pokemon_data/fetch_errors.log
     fi
-    echo "saved pokemon data to pokemon_data/${poke}.json ✅"
-    sleep 2
+}
+
+# Loop through the Pokémon and fetch data
+for poke in $pokemen; do
+    fetch_pokemon_data "$poke"
+    sleep 1
 done
