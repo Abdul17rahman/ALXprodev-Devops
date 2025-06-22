@@ -1,0 +1,38 @@
+#!/bin/bash
+
+url="https://pokeapi.co/api/v2/pokemon/"
+pokemen="bulbasaur ivysaur venusaur charmander charmeleon"
+max_attempts=3
+output_dir="pokemon_data"
+
+# Create the data folder
+mkdir -p "$output_dir"
+
+# Function to fetch data with retry logic
+fetch_pokemon_data() {
+    local poke=$1
+    local attempt=1
+    local success=false
+
+    while [ $attempt -le $max_attempts ]; do
+        echo "[$poke] Attempt $attempt..."
+        res=$(curl -s --fail "${url}${poke}")
+        if [ $? -eq 0 ] && [ -n "$res" ]; then
+            echo "$res" > "${output_dir}/${poke}.json"
+            echo "✅ [$poke] Data saved to ${output_dir}/${poke}.json"
+            success=true
+            break
+        else
+            echo "❌ [$poke] Failed attempt $attempt"
+            ((attempt++))
+            sleep 1
+        fi
+    done
+
+    if [ "$success" = false ]; then
+        echo "⚠️ [$poke] Failed after $max_attempts attempts" >> "${output_dir}/fetch_errors.log"
+    fi
+}
+
+# Loop through Pokémon and fetch in parallel
+for
